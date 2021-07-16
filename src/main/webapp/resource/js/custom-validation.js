@@ -1,7 +1,7 @@
 
-$(() => {
+$(document).ready(function(){
 
-    $("#frmEmployee").validate({
+    page.element.frmEmployee.validate({
         onkeyup: function(element) {$(element).valid()},
         onclick: false,
         rules: {
@@ -12,10 +12,6 @@ $(() => {
             } ,
             phone: {
                 required: true,
-                number: true,
-
-                minlength: 10,
-                maxlength: 11
             },
             email: {
                 required: true,
@@ -33,9 +29,7 @@ $(() => {
             },
             phone: {
                 required: "Không được để trống trường này",
-                number: "Vui lòng nhập một số hợp lệ",
-                minlength: "Hãy nhập ít nhất 10 chữ số",
-                maxlength: "Hãy nhập tối đã 11 chữ số"
+                
             },
             email: {
                 required: "Không được để trống trường này",
@@ -44,7 +38,7 @@ $(() => {
             }
         },
         submitHandler: function() {
-            updateEmployee();
+            page.dialogs.commands.updateEmployee();
         }
     });
 });

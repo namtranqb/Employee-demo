@@ -6,11 +6,16 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/employees")
+
 public class EmployeeController {
+
 
 	@GetMapping()
 	public ModelAndView listEmployees() {
-		ModelAndView model = new ModelAndView("/employee/list");
+		ModelAndView model = new ModelAndView("/employee/demo");
+
 		return model;
 	}
+
+
 }

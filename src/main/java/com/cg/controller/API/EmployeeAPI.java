@@ -1,24 +1,17 @@
 package com.cg.controller.API;
 
+import com.cg.model.Department;
 import com.cg.model.Employee;
 import com.cg.model.EmployeeType;
+import com.cg.model.Position;
 import com.cg.service.department.IDepartmentService;
-import com.cg.service.employee.EmployeeService;
 import com.cg.service.employee.IEmployeeService;
 import com.cg.service.employeeType.IEmployeeTypeService;
 import com.cg.service.position.IPositionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,42 +52,6 @@ public class EmployeeAPI {
 	}
 
 
-//	@PostMapping("/edit")
-//	public String updateProduct(@ModelAttribute("product") Product product, HttpServletRequest request, @ModelAttribute("uploadFile") UploadFile uploadFile) {
-//		String uploadRootPath = request.getServletContext().getRealPath("/upload/product-img/");
-//		if (folderUpload.isEmpty()) {
-//			folderUpload = uploadRootPath;
-//		}
-//		File uploadRootDir = new File(uploadRootPath);
-//		if (!uploadRootDir.exists()) {
-//			uploadRootDir.mkdirs();
-//		}
-//
-//		CommonsMultipartFile[] filesData = uploadFile.getFilesData();
-//		for (CommonsMultipartFile fileData : filesData) {
-//
-//			String fileName = fileData.getOriginalFilename();
-//
-//			if (fileName != null && fileName.length() > 0) {
-//				try {
-//					File serverFile = new File(folderUpload + fileName);
-//					BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream (serverFile));
-//					stream.write(fileData.getBytes());
-//					stream.close();
-//
-//					product.setImage(fileName);
-//					productService.save(product);
-//					System.out.println(product.getId()+product.getProductName());
-//				} catch (Exception e) {
-//					System.out.println("Error Write file: " + fileName);
-//				}
-//			}else{
-//				productService.save(product);
-//			}
-//		}
-//		return "redirect:product";
-//	}
-
 	@PostMapping
 	public ResponseEntity<Employee> saveEmployee (@RequestBody Employee employee) {
 		if (employee.getId () != null) {
@@ -102,13 +59,22 @@ public class EmployeeAPI {
 		}
 
 		Optional<EmployeeType> employeeType = employeeTypeService.findById (employee.getEmployeeType ().getId ());
-
+		Optional<Department> department = departmentService.findById (employee.getDepartment ().getId ());
+		Optional<Position> position = positionService.findById (employee.getPosition().getId ());
 		if (employeeType.isPresent ()) {
 			employee.setEmployeeType (employeeType.get ());
 			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<> (HttpStatus.NOT_FOUND);
 		}
+		if (department.isPresent ()) {
+			employee.setDepartment (department.get ());
+			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
+		}
+		if (position.isPresent()) {
+			employee.setPosition (position.get ());
+			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<> (HttpStatus.NOT_FOUND);
+
 	}
 
 	@DeleteMapping ()

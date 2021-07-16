@@ -36,20 +36,14 @@ class App {
         })
     }
 }
-class EmployeeType {
-    constructor(id, typeName, department){
-        this.id = id;
-        this.typeName = typeName;
-        this.department = department;
-    }
-}
 
 class Employee {
-    constructor(id, avatar, fullName, dob, email, phone, address, workResume, employeeType, department, position) {
+    constructor(id, avatar, fullName, dob, gender, email, phone, address, workResume, employeeType, department, position) {
         this.id = id;
         this.avatar = avatar;
         this.fullName = fullName;
         this.dob = dob;
+        this.gender = gender;
         this.email = email;
         this.phone = phone;
        this.address = address;

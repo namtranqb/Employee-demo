@@ -1,12 +1,9 @@
 package com.cg.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
-import java.sql.Date;
 
 @Entity
 @Data
@@ -27,10 +24,10 @@ public class Employee {
 	private String fullName;
 
 	@Column(nullable=false)
-	private Date dob;
+	private String dob;
 
 	@Column(nullable=false)
-	private String gender;
+	private boolean gender;
 
 	@Column(nullable=false)
 	private String email;
@@ -56,7 +53,7 @@ public class Employee {
 	@JoinColumn(name="positionId")
 	private Position position;
 
-	public Employee (String avatar, String fullName, Date dob, String gender, String email, String phone, String address, String workResume) {
+	public Employee (String avatar, String fullName, String dob, boolean gender, String email, String phone, String address, String workResume) {
 		this.fullName = fullName;
 		this.dob = dob;
 		this.gender = gender;
@@ -67,7 +64,7 @@ public class Employee {
 		this.avatar = avatar;
 	}
 
-	public Employee (String avatar, String fullName, Date dob, String gender, String email, String phone, String address, String workResume, EmployeeType employeeType, Department department, Position position) {
+	public Employee (String avatar, String fullName, String dob, boolean gender, String email, String phone, String address, String workResume, EmployeeType employeeType, Department department, Position position) {
 		this.avatar = avatar;
 		this.fullName = fullName;
 		this.dob = dob;
