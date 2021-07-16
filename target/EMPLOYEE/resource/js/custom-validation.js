@@ -1,7 +1,7 @@
 
-$(() => {
+$(document).ready(function(){
 
-    $("#frmEmployee").validate({
+    page.element.frmEmployee.validate({
         onkeyup: function(element) {$(element).valid()},
         onclick: false,
         rules: {

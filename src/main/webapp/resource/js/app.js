@@ -39,17 +39,17 @@ class App {
 
 class Employee {
     constructor(id, avatar, fullName, dob, gender, email, phone, address, workResume, employeeType, department, position) {
-        this.id = id;
-        this.avatar = avatar;
-        this.fullName = fullName;
-        this.dob = dob;
-        this.gender = gender;
-        this.email = email;
-        this.phone = phone;
-       this.address = address;
-       this.workResume = workResume;
-       this.employeeType = employeeType;
-       this.department = department;
-       this.position = position;
+        this.id = id;             //0
+        this.avatar = avatar;      //1
+        this.fullName = fullName;   //2
+        this.dob = dob;               //3
+        this.gender = gender;           //4
+        this.email = email;              //5
+        this.phone = phone;                 //6
+       this.address = address;                //7
+       this.workResume = workResume;           //8
+       this.employeeType = employeeType;          //9
+       this.department = department;                //10
+       this.position = position;                       //11
     }
 }

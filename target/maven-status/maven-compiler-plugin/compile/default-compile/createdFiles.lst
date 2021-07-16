@@ -13,7 +13,6 @@ com/cg/controller/API/DepartmentAPI.class
 com/cg/service/employeeType/EmployeeTypeService.class
 com/cg/service/position/PositionService.class
 com/cg/config/AppConfig.class
-com/cg/model/upload/UploadFile.class
 com/cg/controller/API/EmployeeAPI.class
 com/cg/service/employeeType/IEmployeeTypeService.class
 com/cg/controller/API/PositionAPI.class

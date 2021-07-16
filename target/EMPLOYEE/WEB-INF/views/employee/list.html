@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Employee management</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/resource/css/bootstrap.css">
+    <link rel="stylesheet" href="/resource/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/resource/css/sweetalert2.min.css">
+    <script type="text/javascript" src="/resource/js/sweetalert2.min.js"></script>
+    <script type="text/javascript" src="/resource/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/resource/js/jquery.validate-1.19.3.min.js"></script>
+    <script type="text/javascript" src="/resource/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/resource/css/style.css">
+    <script type="text/javascript" src="/resource/js/app.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="success-alert">
+
+    </div>
+    <h1 style="text-align: center; color: blue">Employee Information</h1>
+    <div class="box-header" style="margin-bottom: 5px">
+        <input type="button" id="btnCreateEmployee" class="btn btn-outline-primary" value="Create">
+    </div>
+    <div class="box-body">
+        <textarea style="display:none" id="tempRowTable">
+            <tr id="tr_{0}">
+                <td>{1}</td>
+                <td><a class="view" data-id="{0}">{2}</a></td>
+                <td>{3}</td>
+                <td>{5}</td>
+                <td>{6}</td>
+                <td>{10}</td>
+                <td>{11}</td>
+                <td>
+                    <a class="edit" data-id="{0}">
+                        <i class="fa fa-pencil-square-o fa-fw"></i>
+                        edit
+                    </a>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger delete" data-id="{0}">
+                        <i class="fa fa-trash-o"></i>
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        </textarea>
+        <textarea style="display:none" id="tempOption">
+            <option value="{0}">{1}</option>
+        </textarea>
+        <input type="hidden" id="currentRow"/>
+        <table id="orderItems" class="table table-hover" border="1">
+            <thead>
+            <tr>
+                <th>Avatar</th>
+                <th>FullName</th>
+                <th>DateOfBirth</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <th:block th:replace="/employee/formEmployee :: frm-employee"></th:block>
+    <th:block th:replace="/employee/viewEmployee :: frm-viewEmployee"></th:block>
+
+    <script type="text/javascript" src="/resource/js/custom-validation.js"></script>
+
+    <script>
+        let page = {
+            urls: {
+                getAllEmployees: App.BASE_URL_EMPLOYEE,
+                getAllEmployeeTypes: App.BASE_URL_EMPLOYEETYPE,
+                getEmployee: App.BASE_URL_EMPLOYEE + '/view/',
+                save: App.BASE_URL_EMPLOYEE,
+                deleteEmployee: App.BASE_URL_EMPLOYEE,
+                getDepartments: App.BASE_URL_DEPARTMENT,
+                getDepartmentsByEmployeeType: App.BASE_URL_DEPARTMENT,
+                getPositions: App.BASE_URL_POSITION,
+                getPositionsByDepartment: App.BASE_URL_POSITION,
+            },
+            element: {},
+            loadData: {},
+            dialogs: {
+                element: {},
+                loadData: {},
+                commands: {}
+            },
+            commands: {}
+        }
+
+        page.element.btnCreateEmployee = $("#btnCreateEmployee");
+        page.element.btnUpdateEmployee = $("#btnUpdateEmployee");
+        page.element.orderItems = $("#orderItems");
+        page.element.tbody = $("#orderItems tbody");
+        page.element.employeeModal = $("#employeeModal");
+        page.element.employeeViewModal = $("#employeeViewModal");
+        page.element.frmEmployee = $("#frmEmployee");
+        page.element.currentRow = $("#currentRow");
+
+        page.dialogs.element.avatar = $("#avatar");
+        page.dialogs.element.fullName = $("#fullName");
+        page.dialogs.element.dob = $("#dob");
+        page.dialogs.element.gender = $("input[type='radio'][name='gender']");
+        page.dialogs.element.email = $("#email");
+        page.dialogs.element.phone = $("#phone");
+        page.dialogs.element.address = $("#address");
+        page.dialogs.element.employeeType = $("#employeeType");
+        page.dialogs.element.department = $("#department");
+        page.dialogs.element.position = $("#position");
+
+        let employee = new Employee();
+        let tempRowTable = jQuery.validator.format($.trim($("#tempRowTable").val()));
+        let tempOption = jQuery.validator.format($.trim($("#tempOption").val()));
+
+        let addRow = () => {
+            page.element.tbody.prepend($(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.gender, employee.email, employee.phone, employee.address, employee.workResume,employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName)));
+        }
+
+        page.loadData.getEmployees = () => {
+            $.ajax({
+                type: "GET",
+                url: page.urls.getAllEmployees,
+            }).done((data) => {
+                $.each(data, (i, item) => {
+                    employee = item;
+                    addRow();
+                });
+            }).fail(function () {
+                App.showErrorAlert("Tải danh sách thất bại !");
+            });
+        }
+
+        page.dialogs.loadData.getEmployeeTypes = () => {
+            return $.ajax({
+                type: "GET",
+                url: page.urls.getAllEmployeeTypes,
+            }).done((data) => {
+                page.dialogs.element.employeeType.empty();
+
+                $.each(data, (i, item) => {
+                    page.dialogs.element.employeeType.append($(tempOption(item.id, item.typeName)));
+                });
+
+            }).fail(function () {
+                App.showErrorAlert("An error occurred. Please try again later !");
+            });
+        }
+
+        page.dialogs.loadData.getDepartments = (employeeTypeId) => {
+            return $.ajax({
+                type: "GET",
+                url: page.urls.getDepartmentsByEmployeeType + "/" + employeeTypeId,
+            }).done((data) => {
+                page.dialogs.element.department.empty();
+
+                $.each(data, (i, item) => {
+                    page.dialogs.element.department.append($(tempOption(item.id, item.departmentName)));
+                });
+
+            }).fail(function () {
+                App.showErrorAlert("Khoa lỗi");
+            });
+        }
+
+        page.dialogs.loadData.getPositions = (departmentId) => {
+            $.ajax({
+                type: "GET",
+                url: page.urls.getPositionsByDepartment + "/" + departmentId,
+            }).done((data) => {
+                page.dialogs.element.position.empty();
+
+                $.each(data, (i, item) => {
+                    page.dialogs.element.position.append($(tempOption(item.id, item.positionName)));
+                });
+            }).fail(function () {
+                App.showErrorAlert("Chức vụ lỗi ");
+            });
+        }
+
+        page.commands.assignModal = (e) => {
+            page.dialogs.element.avatar.val(e.avatar);
+            page.dialogs.element.fullName.val(e.fullName);
+            page.dialogs.element.dob.val(e.dob);
+            page.dialogs.element.gender.filter(`[value='${e.gender}']`).click();
+            page.dialogs.element.email.val(e.email);
+            page.dialogs.element.phone.val(e.phone);
+            page.dialogs.element.address.val(e.address);
+            page.dialogs.element.employeeType.val(e.employeeType.id);
+
+            page.dialogs.commands.employeeTypeChange().then(function () {
+                page.dialogs.element.department.val(e.department.id);
+
+                page.dialogs.commands.departmentChange().then(function () {
+                    page.dialogs.element.position.val(e.position.id);
+                });
+            });
+        }
+
+        page.commands.deleteConfirm = () => {
+            App.showDeleteConfirmDialog()
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "DELETE",
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            url: page.urls.deleteEmployee,
+                            data: JSON.stringify({
+                                id: employee.id,
+                            }),
+                            success() {
+                                App.showSuccessAlert("Xóa " + employee.fullName + " thành công !");
+                                $("#tr_" + employee.id).remove();
+                            },
+                            error() {
+                                App.showErrorAlert("Xóa lỗi !");
+                            }
+                        });
+                    }
+                });
+        }
+
+        page.dialogs.commands.employeeTypeChange = () => {
+            return $.ajax({
+                type: "GET",
+                url: page.urls.getDepartmentsByEmployeeType + "/" + page.dialogs.element.employeeType.val(),
+            }).done((data) => {
+                page.dialogs.element.department.empty();
+
+                $.each(data, (i, item) => {
+                    page.dialogs.element.department.append($(tempOption(item.id, item.departmentName)));
+                });
+            }).fail(function () {
+                App.showErrorAlert("An error occurred. Please try again later !");
+            });
+        }
+
+        page.dialogs.commands.departmentChange = () => {
+            return $.ajax({
+                type: "GET",
+                url: page.urls.getPositionsByDepartment + "/" + page.dialogs.element.department.val(),
+            }).done((data) => {
+                page.dialogs.element.position.empty();
+
+                $.each(data, (i, item) => {
+                    page.dialogs.element.position.append($(tempOption(item.id, item.positionName)));
+                });
+            }).fail(function () {
+                App.showErrorAlert("An error occurred. Please try again later !");
+            });
+        }
+
+        page.dialogs.commands.updateEmployee = () => {
+            employee.avatar = page.dialogs.element.avatar.val();
+            employee.fullName = page.dialogs.element.fullName.val();
+            employee.dob = page.dialogs.element.dob.val();
+            employee.gender = page.dialogs.element.gender.filter(":checked").val() === "true" ? 1 : 0;
+            employee.email = page.dialogs.element.email.val();
+            employee.phone = page.dialogs.element.phone.val();
+            employee.address = page.dialogs.element.address.val();
+            employee.employeeType = { "id": page.dialogs.element.employeeType.val() };
+            employee.department = { "id": page.dialogs.element.department.val() };
+            employee.position = { "id": page.dialogs.element.position.val() };
+
+            $.ajax({
+                type: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                url: page.urls.save,
+                data: JSON.stringify(employee)
+            }).done((resp) => {
+                employee = resp;
+                let rowId = page.element.currentRow.val();
+                let updated_row = $(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.gender, employee.email, employee.phone, employee.address, employee.workResume,employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName));
+
+                if (rowId !== "") {
+                    let row = page.element.tbody.find('#' + rowId);
+                    row.replaceWith(updated_row);
+                    page.element.currentRow.val("");
+                    page.dialogs.commands.reset();
+
+                    App.showSuccessAlert("Cập nhật " + employee.fullName + " thành công !");
+                } else {
+                    addRow();
+                    App.showSuccessAlert("Thêm mới " + employee.fullName + " thành công !");
+                }
+            }).fail(() => {
+                App.showErrorAlert("Cập nhật lỗi !");
+            });
+
+            page.element.employeeModal.modal('hide');
+        }
+
+        page.dialogs.commands.show = () => {
+            if (employee.id == null || employee.id === 0) {
+
+                page.element.employeeModal.modal('toggle');
+            } else {
+                $.ajax({
+                    type: "GET",
+                    url: page.urls.getEmployee + employee.id,
+                }).done((resp) => {
+                    page.commands.assignModal(resp);
+                    page.element.employeeModal.modal('toggle');
+                }).fail(function () {
+                    App.showErrorAlert("Lỗi dữ liệu " + employee.id);
+                });
+            }
+        }
+
+        page.dialogs.commands.view = () => {
+            $.ajax({
+                type: "GET",
+                url: page.urls.getEmployee + employee.id,
+            }).done((resp) => {
+                page.commands.assignModal(resp);
+                page.element.employeeViewModal.modal('toggle');
+            }).fail(function () {
+                App.showErrorAlert("Lỗi dữ liệu " + employee.id);
+            });
+        }
+
+        page.dialogs.commands.close = () => {
+            page.dialogs.commands.reset();
+        }
+
+        page.dialogs.commands.reset = () => {
+            page.element.frmEmployee[0].reset();
+            page.element.frmEmployee.validate().resetForm();
+            page.dialogs.element.employeeType.prop("selectedIndex", 0).change();
+        }
+
+        page.initializeControlEvent = () => {
+
+            page.element.btnCreateEmployee.on("click", () => {
+                delete employee.id;
+                page.dialogs.commands.show();
+            });
+
+            page.element.btnUpdateEmployee.on("click", () => {
+                page.element.frmEmployee.submit();
+            });
+
+            page.element.orderItems.on("click", ".view", function () {
+                employee.id = $(this).data('id');
+                page.element.currentRow.val($(this).closest("tr").attr("id"));
+                page.dialogs.commands.view ();
+
+            });
+
+            page.element.orderItems.on("click", ".edit", function () {
+                employee.id = $(this).data('id');
+                page.element.currentRow.val($(this).closest("tr").attr("id"));
+                page.dialogs.commands.show();
+            });
+
+            page.element.orderItems.on("click", ".delete", function () {
+                employee.id = $(this).data('id');
+                page.commands.deleteConfirm();
+            });
+
+            page.dialogs.element.employeeType.on("change", function () {
+                page.dialogs.commands.employeeTypeChange().done(function () {
+                    page.dialogs.commands.departmentChange();
+                });
+            });
+
+            page.dialogs.element.department.on("change", page.dialogs.commands.departmentChange);
+
+            page.element.employeeModal.on("hidden.bs.modal", page.dialogs.commands.close);
+        };
+
+        $(document).ready(function(){
+            page.loadData.getEmployees();
+
+            page.dialogs.loadData.getEmployeeTypes().then(function() {
+
+                let employeeTypeVal = page.dialogs.element.employeeType.prop("selectedIndex", 0).val();
+
+                if (employeeTypeVal != null) {
+                    page.dialogs.loadData.getDepartments(employeeTypeVal).then(function () {
+
+                        let departmentVal = page.dialogs.element.department.prop("selectedIndex", 0).val();
+
+                        if (departmentVal != null) {
+                            page.dialogs.loadData.getPositions(departmentVal);
+                        }
+                    });
+                }
+            });
+
+            page.initializeControlEvent();
+        });
+
+    </script>
+
+</div>
+</body>
+</html>

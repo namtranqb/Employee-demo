@@ -12,7 +12,7 @@ public class EmployeeController {
 
 	@GetMapping()
 	public ModelAndView listEmployees() {
-		ModelAndView model = new ModelAndView("/employee/demo");
+		ModelAndView model = new ModelAndView("/employee/list");
 
 		return model;
 	}

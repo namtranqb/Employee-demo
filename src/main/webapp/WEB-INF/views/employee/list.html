@@ -25,17 +25,13 @@
     <div class="box-body">
         <textarea style="display:none" id="tempRowTable">
             <tr id="tr_{0}">
-                <td>{0}</td>
-                <td><a href="/employee?action=view&id={0}">{1}</a></td>
-                <td>{2}</td>
+                <td>{1}</td>
+                <td><a class="view" data-id="{0}">{2}</a></td>
                 <td>{3}</td>
-                <td>{4}</td>
                 <td>{5}</td>
                 <td>{6}</td>
-                <td>{7}</td>
-                <td>{8}</td>
-                <td>{9}</td>
                 <td>{10}</td>
+                <td>{11}</td>
                 <td>
                     <a class="edit" data-id="{0}">
                         <i class="fa fa-pencil-square-o fa-fw"></i>
@@ -57,15 +53,11 @@
         <table id="orderItems" class="table table-hover" border="1">
             <thead>
             <tr>
-                <th>#</th>
                 <th>Avatar</th>
                 <th>FullName</th>
                 <th>DateOfBirth</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Address</th>
-                <th>WorkResume</th>
-                <th>Type</th>
                 <th>Department</th>
                 <th>Position</th>
                 <th></th>
@@ -77,8 +69,10 @@
         </table>
     </div>
     <th:block th:replace="/employee/formEmployee :: frm-employee"></th:block>
+    <th:block th:replace="/employee/viewEmployee :: frm-viewEmployee"></th:block>
 
     <script type="text/javascript" src="/resource/js/custom-validation.js"></script>
+    <script type="text/javascript" src="/resource/js/validator.js"></script>
 
     <script>
         let page = {
@@ -108,6 +102,7 @@
         page.element.orderItems = $("#orderItems");
         page.element.tbody = $("#orderItems tbody");
         page.element.employeeModal = $("#employeeModal");
+        page.element.employeeViewModal = $("#employeeViewModal");
         page.element.frmEmployee = $("#frmEmployee");
         page.element.currentRow = $("#currentRow");
 
@@ -127,7 +122,7 @@
         let tempOption = jQuery.validator.format($.trim($("#tempOption").val()));
 
         let addRow = () => {
-            page.element.tbody.prepend($(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.email, employee.phone, employee.address, employee.workResume, employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName)));
+            page.element.tbody.prepend($(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.gender, employee.email, employee.phone, employee.address, employee.workResume,employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName)));
         }
 
         page.loadData.getEmployees = () => {
@@ -208,8 +203,6 @@
                     page.dialogs.element.position.val(e.position.id);
                 });
             });
-
-            page.element.employeeModal.modal('toggle');
         }
 
         page.commands.deleteConfirm = () => {
@@ -291,7 +284,7 @@
             }).done((resp) => {
                 employee = resp;
                 let rowId = page.element.currentRow.val();
-                let updated_row = $(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.email, employee.phone, employee.address, employee.workResume, employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName));
+                let updated_row = $(tempRowTable(employee.id, employee.avatar, employee.fullName, employee.dob, employee.gender, employee.email, employee.phone, employee.address, employee.workResume,employee.employeeType.typeName, employee.department.departmentName, employee.position.positionName));
 
                 if (rowId !== "") {
                     let row = page.element.tbody.find('#' + rowId);
@@ -299,7 +292,7 @@
                     page.element.currentRow.val("");
                     page.dialogs.commands.reset();
 
-                    App.showSuccessAlert("Cập nhật" + employee.fullName + " thành công !");
+                    App.showSuccessAlert("Cập nhật " + employee.fullName + " thành công !");
                 } else {
                     addRow();
                     App.showSuccessAlert("Thêm mới " + employee.fullName + " thành công !");
@@ -321,10 +314,23 @@
                     url: page.urls.getEmployee + employee.id,
                 }).done((resp) => {
                     page.commands.assignModal(resp);
+                    page.element.employeeModal.modal('toggle');
                 }).fail(function () {
                     App.showErrorAlert("Lỗi dữ liệu " + employee.id);
                 });
             }
+        }
+
+        page.dialogs.commands.view = () => {
+            $.ajax({
+                type: "GET",
+                url: page.urls.getEmployee + employee.id,
+            }).done((resp) => {
+                page.commands.assignModal(resp);
+                page.element.employeeViewModal.modal('toggle');
+            }).fail(function () {
+                App.showErrorAlert("Lỗi dữ liệu " + employee.id);
+            });
         }
 
         page.dialogs.commands.close = () => {
@@ -346,6 +352,13 @@
 
             page.element.btnUpdateEmployee.on("click", () => {
                 page.element.frmEmployee.submit();
+            });
+
+            page.element.orderItems.on("click", ".view", function () {
+                employee.id = $(this).data('id');
+                page.element.currentRow.val($(this).closest("tr").attr("id"));
+                page.dialogs.commands.view ();
+
             });
 
             page.element.orderItems.on("click", ".edit", function () {
@@ -391,6 +404,8 @@
 
             page.initializeControlEvent();
         });
+
+
 
     </script>
 

@@ -61,18 +61,20 @@ public class EmployeeAPI {
 		Optional<EmployeeType> employeeType = employeeTypeService.findById (employee.getEmployeeType ().getId ());
 		Optional<Department> department = departmentService.findById (employee.getDepartment ().getId ());
 		Optional<Position> position = positionService.findById (employee.getPosition().getId ());
-		if (employeeType.isPresent ()) {
+		if (employeeType.isPresent () || department.isPresent () || position.isPresent()) {
 			employee.setEmployeeType (employeeType.get ());
-			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
-		}
-		if (department.isPresent ()) {
 			employee.setDepartment (department.get ());
-			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
-		}
-		if (position.isPresent()) {
 			employee.setPosition (position.get ());
 			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
 		}
+//		if (department.isPresent ()) {
+//			employee.setDepartment (department.get ());
+//			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
+//		}
+//		if (position.isPresent()) {
+//			employee.setPosition (position.get ());
+//			return new ResponseEntity<> (employeeService.save (employee), HttpStatus.CREATED);
+//		}
 		return new ResponseEntity<> (HttpStatus.NOT_FOUND);
 
 	}
